@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>WebConfigEncrypter</name>
+    </assembly>
+    <members>
+        <member name="T:WebConfigEncrypter.Pkcs12ProtectedConfigurationProvider">
+            <summary>
+            Class Pkcs12ProtectedConfigurationProvider.
+            </summary>
+            <seealso cref="T:System.Configuration.ProtectedConfigurationProvider" />
+        </member>
+        <member name="M:WebConfigEncrypter.Pkcs12ProtectedConfigurationProvider.Decrypt(System.Xml.XmlNode)">
+            <summary>
+            Decrypts the XML node passed to it.
+            </summary>
+            <param name="encryptedNode">The XmlNode to decrypt.</param>
+            <returns></returns>
+        </member>
+        <member name="M:WebConfigEncrypter.Pkcs12ProtectedConfigurationProvider.Encrypt(System.Xml.XmlNode)">
+            <summary>
+            Encrypts the XML node passed to it.
+            </summary>
+            <param name="node">The XmlNode to encrypt.</param>
+            <returns></returns>
+        </member>
+        <member name="M:WebConfigEncrypter.Pkcs12ProtectedConfigurationProvider.Initialize(System.String,System.Collections.Specialized.NameValueCollection)">
+            <summary>
+            Initializes the provider with default settings.
+            </summary>
+            <param name="name"></param>
+            <param name="configurationValues">A NameValueCollection collection of values to use
+            when initializing the object. This must include a thumbprint value for the thumbprint of
+            the certificate used to encrypt the configuration section.
+            </param>
+        </member>
+        <member name="M:WebConfigEncrypter.Pkcs12ProtectedConfigurationProvider.GetCertificate(System.String,System.Security.Cryptography.X509Certificates.StoreLocation)">
+            <summary>
+            Get certificate from the Local Machine store, based on the given thumbprint
+            </summary>
+            <param name="thumbprint">The thumbnail of the certificate used to encrypt the configuration file.</param>
+            <param name="storeLocation">This can be CurrentUser or LocalMachine. Generally speaking Azure uses CurrentUser and Windows IIS uses LocalMachine.</param>
+            <returns></returns>
+            <remarks>The certificate, with private key, must be accessible in the indicated store location.</remarks>
+        </member>
+        <member name="M:WebConfigEncrypter.Pkcs12ProtectedConfigurationProvider.GetCryptoServiceProvider(System.Boolean)">
+            <summary>
+            Get either the public key for encrypting configuration sections or the private key to decrypt them.
+            </summary>
+            <param name="IsEncryption"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

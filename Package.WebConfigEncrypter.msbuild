@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project
+	 xmlns="http://schemas.microsoft.com/developer/msbuild/2003"
+	 ToolsVersion="4.0"
+	 DefaultTargets="Build">
+
+	<PropertyGroup>
+		<MSBuildCommunityTasksPath>$(MSBuildProjectDirectory)\.build</MSBuildCommunityTasksPath>
+		<BuildOutputPath>$(MSBuildProjectDirectory)\Build</BuildOutputPath>
+		<HelpPath>$(MSBuildProjectDirectory)\Help</HelpPath>
+    <ReadmePath>$(MSBuildProjectDirectory)\..\readme.md</ReadmePath>
+	</PropertyGroup>
+	
+	<PropertyGroup>
+ 		<MainSolution>WebConfigEncrypter.sln</MainSolution>
+		<ResultDll>WebConfigEncrypter.dll</ResultDll>
+		<ResultPdb>WebConfigEncrypter.pdb</ResultPdb>
+		<ResultXml>WebConfigEncrypter.xml</ResultXml>
+		
+		<NetStandardPath>$(MSBuildProjectDirectory)\WebConfigEncrypter</NetStandardPath>
+
+    <VersionSource>$(NetStandardPath)\bin\Release\netstandard2.0\$(ResultDll)</VersionSource>
+		<NuspecName>WebConfigEncrypter.nuspec</NuspecName>
+	
+</PropertyGroup>
+
+	<Import Project=".build\MSBuild.Community.Tasks.Targets" />
+
+	<UsingTask TaskName="UpdateNuspecVersionFromAssembly" AssemblyFile="$(MSBuildProjectDirectory)\MSBuild.Task.AssemblyVersion.dll"/>
+
+	<Target Name="Build">
+		<CallTarget Targets="Clean" />
+		<CallTarget Targets="Compile" />
+		<CallTarget Targets="PackageBinaries" />
+		<!--<CallTarget Targets="PackageHelp" />-->
+		<CallTarget Targets="BuildNugetFile" />
+	</Target>
+
+	<Target Name="Clean" >
+		<Message Text="Cleaning..." />
+		<Deletetree Directories="$(BuildOutputPath)" />
+		<MSBuild Projects="$(MainSolution)" Properties="Configuration=Debug" Targets="Clean" StopOnFirstFailure="true" />
+		<MSBuild Projects="$(MainSolution)" Properties="Configuration=Release" Targets="Clean" StopOnFirstFailure="true"/>
+	</Target>
+
+	<Target Name="Compile">
+		<Message Text="Building..." />
+		<MSBuild Projects="$(MainSolution)" Properties="Configuration=Release" Targets="Rebuild" StopOnFirstFailure="true"/>
+	</Target>
+
+	<Target Name="PackageBinaries">
+		<Message Text="Copying binaries..." />
+		<ItemGroup>
+			<NetStandardOutput Include="$(NetStandardPath)\bin\Release\netstandard2.0\$(ResultDll)" />
+			<NetStandardOutput Include="$(NetStandardPath)\bin\Release\netstandard2.0\$(ResultPdb)" />
+			<NetStandardOutput Include="$(NetStandardPath)\bin\Release\netstandard2.0\$(ResultXml)" />
+
+    </ItemGroup>
+
+    <Copy SourceFiles="@(NetStandardOutput)" DestinationFolder="$(BuildOutputPath)\lib\netstandard2.0" />
+	</Target>
+	
+	<!--<Target Name="PackageHelp">
+
+		<Message Text="Compressing help files..." />
+		<ItemGroup>
+			<HelpFiles Include="$(HelpPath)\**" />
+		</ItemGroup>
+		<Zip ZipFileName="$(BuildOutputPath)\docs\Help.zip" WorkingDirectory="$(MSBuildProjectDirectory)" Files="@(HelpFiles)" />
+
+		<Copy SourceFiles="$(ReadmePath)" DestinationFolder="$(BuildOutputPath)\docs" />
+
+	</Target>-->
+	
+	<Target Name="BuildNugetFile">
+		<Copy SourceFiles="$(MSBuildProjectDirectory)\$(NuspecName)" DestinationFolder="$(BuildOutputPath)" />
+
+		<Message Text="Updating Nuspec File..." />
+
+		<GetAssemblyIdentity AssemblyFiles="$(VersionSource)">
+			<Output TaskParameter="Assemblies" ItemName="AssemblyIdentity" />
+		</GetAssemblyIdentity>
+
+		<XmlUpdate
+			 XmlFileName="$(BuildOutputPath)\$(NuspecName)"
+			 XPath="/package/metadata/version"
+			 Value="%(AssemblyIdentity.Version)" />
+
+		<Exec Command='"$(MSBuildProjectDirectory)\.nuget\NuGet.exe" pack $(NuspecName)"' WorkingDirectory="$(BuildOutputPath)" />
+	</Target>
+
+</Project>
